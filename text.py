@@ -27,7 +27,7 @@ while 1:
   removed = [f for f in before if not f in after]
 
   if (added and added[0]!="form1.pdf"): 
-
+      print("started")
     #  file = open(added[0], "r")
     #  content = file.read()
     #  data=(content.split())
@@ -57,7 +57,11 @@ while 1:
                 x=(index)
             
       index = data.index("Maximum")
-               
+      typeAc="C56X"
+      if "F2TH" in data:
+        typeAc="F2TH"
+      elif "C525" in data: 
+        typeAc="C525"       
       currentDate=datetime.today().strftime('%d.%m.%Y')
       reg=data[int(index)-1]
       callSign=data[3]
@@ -77,7 +81,7 @@ while 1:
       regAlt=["YU-FVJ","YU-SVL","YU-SPC","YU-SVJ","YU-SCM"]
       typeAlt=["F2TH","C56X","C56X","C56X","C525"]
       regAlt.remove(reg)
-      typeAlt.remove(reg)
+      typeAlt.remove(typeAc)
     
 
       fname = "uk.html"
@@ -98,7 +102,12 @@ while 1:
       result10 = re.sub(r'<% regAlt1 %>', regAlt[0] ,result9)
       result11 = re.sub(r'<% regAlt2 %>', regAlt[1] ,result10)
       result12 = re.sub(r'<% regAlt3 %>', regAlt[2] ,result11)
-      result = re.sub(r'<% regAlt4 %>', regAlt[3] ,result12)
+      result13 = re.sub(r'<% regAlt4 %>', regAlt[3] ,result12)
+      result14 = re.sub(r'<% regType1 %>', typeAlt[0] ,result13)
+      result15 = re.sub(r'<% regType2 %>', typeAlt[1] ,result14)
+      result16 = re.sub(r'<% regType3 %>', typeAlt[2] ,result15)
+      result17 = re.sub(r'<% regType4 %>', typeAlt[3] ,result16)
+      result = re.sub(r'<% typeAc %>', typeAc ,result17)
       asyncio.get_event_loop().run_until_complete(create_pdf_from_html(result, 'form1.pdf'))
      # file.close()
   before = after
