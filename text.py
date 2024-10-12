@@ -1,8 +1,11 @@
 import os, time
 from pyppeteer import launch
+import pytesseract
+from pdf2image import convert_from_path
 import asyncio
 import re
 from datetime import datetime
+import pandas as pd
 
 async def create_pdf_from_html(html, pdf_path):
     browser = await launch()
@@ -22,32 +25,60 @@ while 1:
 
   added = [f for f in after if not f in before]
   removed = [f for f in before if not f in after]
+
   if (added and added[0]!="form1.pdf"): 
 
-      file = open(added[0], "r")
-      content = file.read()
-      data=(content.split())
-
-        
+    #  file = open(added[0], "r")
+    #  content = file.read()
+    #  data=(content.split())
+      
+      pages = convert_from_path(added[0], 500,None, first_page=1, last_page=1)
+     
+    # Extract text from each page using Tesseract OCR
+      text_data = ''
+      for page in pages:
+        text = pytesseract.image_to_string(page)
+        text_data += text + '\n'
+     
+    # Return the text data
+    # return text_data
+      data=text_data.split()
+      print(data)
+      def is_date(date_string):
+        try:
+            pd.to_datetime(date_string, format='%d/%m/%Y')
+            return True
+        except Exception:
+            return False
+    
+      x=0
+      for index, item in enumerate(data):
+            if is_date(item):
+                x=(index)
+            
+      index = data.index("Maximum")
+               
       currentDate=datetime.today().strftime('%d.%m.%Y')
-      reg=data[0]
+      reg=data[int(index)-1]
       callSign=data[3]
-      date1=data[2]
-      origin1=data[4]
-      dest1=data[9]
-      time1=data[6]
-      timeEta1=data[7]
-      pax1=data[12]
+      date1=data[int(x)-7]
+      origin1=data[int(x)-5]
+      dest1=data[int(x)-3]
+      time1=data[int(x)-2]
+      timeEta1=data[int(x)-2]
+      pax1=data[int(x)-1]
 
-      date2=data[14]
-      origin2=data[16]
-      dest2=data[21]
-      time2=data[18]
-      timeEta2=data[19]
-      pax2=data[24]
+      date2=data[x]
+      origin2=data[int(x)+2]
+      dest2=data[int(x)+4]
+      time2=data[int(x)+5]
+      timeEta2=data[int(x)+6]
+      pax2=data[int(x)+7]
       regAlt=["YU-FVJ","YU-SVL","YU-SPC","YU-SVJ","YU-SCM"]
+      typeAlt=["F2TH","C56X","C56X","C56X","C525"]
       regAlt.remove(reg)
-      print(regAlt)
+      typeAlt.remove(reg)
+    
 
       fname = "uk.html"
       if (dest1[0:2]=="LE"): fname="Spain.html"
@@ -69,6 +100,6 @@ while 1:
       result12 = re.sub(r'<% regAlt3 %>', regAlt[2] ,result11)
       result = re.sub(r'<% regAlt4 %>', regAlt[3] ,result12)
       asyncio.get_event_loop().run_until_complete(create_pdf_from_html(result, 'form1.pdf'))
-      file.close()
+     # file.close()
   before = after
   
