@@ -6,6 +6,10 @@ import asyncio
 import re
 from datetime import datetime
 import pandas as pd
+import json
+
+callSigns =  '{ "YU-FVJ":"PNC1A", "YU-SCM":"PNC4M", "YU-SCJ":"PNC5C","YU-SVL":"PNC1VL", "YU-SVJ":"PNC7D", "YU-SPC":"PND3T", "YU-LSA":"PNC6L"}'
+sc=json.loads(callSigns)
 
 async def create_pdf_from_html(html, pdf_path):
     browser = await launch()
@@ -64,19 +68,21 @@ while 1:
         typeAc="C525"       
       currentDate=datetime.today().strftime('%d.%m.%Y')
       reg=data[int(index)-1]
-      callSign=data[3]
+      callSign=sc[reg]
       date1=data[int(x)-7]
       origin1=data[int(x)-5]
       dest1=data[int(x)-3]
-      time1=data[int(x)-2]
-      timeEta1=data[int(x)-2]
+      
+      time1=(data[int(x)-2])[0:2]
+      timeEta1=int(time1)+2
+      
       pax1=data[int(x)-1]
 
       date2=data[x]
       origin2=data[int(x)+2]
       dest2=data[int(x)+4]
-      time2=data[int(x)+5]
-      timeEta2=data[int(x)+6]
+      time2=(data[int(x)+5])[0:2]
+      timeEta2=int(time2)+2
       pax2=data[int(x)+7]
       regAlt=["YU-FVJ","YU-SVL","YU-SPC","YU-SVJ","YU-SCM"]
       typeAlt=["F2TH","C56X","C56X","C56X","C525"]
@@ -95,8 +101,8 @@ while 1:
       result3 = re.sub(r'<% callSign %>', callSign, result2)
       result4 = re.sub(r'<% date1 %>', date1, result3)
       result5 = re.sub(r'<% date2 %>', date2 ,result4)
-      result6 = re.sub(r'<% longRoute1 %>', time1 +" "+origin1 +"-"+dest1+" "+str(timeEta1),result5)
-      result7 = re.sub(r'<% longRoute2 %>', time2 +" "+origin2 +"-"+dest2+" "+str(timeEta2),result6)
+      result6 = re.sub(r'<% longRoute1 %>', (time1+":00") +" "+origin1 +"-"+dest1+" "+str(timeEta1)+":00",result5)
+      result7 = re.sub(r'<% longRoute2 %>', time2+":00" +" "+origin2 +"-"+dest2+" "+str(timeEta2)+":00",result6)
       result8 = re.sub(r'<% shortRoute1 %>', origin1 +"-"+dest1,result7)
       result9 = re.sub(r'<% shortRoute2 %>', origin2 +"-"+dest2 ,result8)
       result10 = re.sub(r'<% regAlt1 %>', regAlt[0] ,result9)
